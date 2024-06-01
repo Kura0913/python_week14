@@ -1,26 +1,33 @@
 from PyQt6 import QtWidgets, QtGui, QtCore
 from WorkWidgets.AddStuWidget import AddStuWidget
 from WorkWidgets.ShowStuWidget import ShowStuWidget
+from WorkWidgets.DelStuWidget import DelStuWidget
+from WorkWidgets.ModifyStuWidget import ModifyStuWidget
 from WorkWidgets.WidgetComponents import LabelComponent
 from WorkWidgets.WidgetComponents import ButtonComponent
-from WorkWidgets.WidgetComponents import TabWidget
+from WorkWidgets.WidgetComponents import TabWidgetComponent
 from SocketClient.SocketClient import SocketClient
 
 
+
 class MainWidget(QtWidgets.QWidget):
-    def __init__(self, client):
+    def __init__(self, client : SocketClient):
         super().__init__()
         self.setObjectName("main_widget")
         self.client = client
 
+        self.page_dict = {
+            "Add": AddStuWidget(self.client),
+            "Show": ShowStuWidget(self.client),
+            "Delete": DelStuWidget(self.client),
+            "Modify": ModifyStuWidget(self.client)
+        }
+
         layout = QtWidgets.QGridLayout()
         header_label = LabelComponent(24, "Student Management System")
-        # function_widget = FunctionWidget(self.client)
-        # menu_widget = MenuWidget(function_widget.update_widget)
-        self.tab_widget = TabWidget(16)
+        self.tab_widget = TabWidgetComponent(16)
         
-        self.tab_widget.add_new_page(AddStuWidget(self.client), "Add")
-        self.tab_widget.add_new_page(ShowStuWidget(self.client), "Show")
+        self.tab_widget.add_new_pages(self.page_dict)        
         
         self.tab_widget.tabBarClicked.connect(self.on_tab_clicked)
         self.tab_widget.tabBarDoubleClicked.connect(self.on_tab_double_clicked)
@@ -33,46 +40,15 @@ class MainWidget(QtWidgets.QWidget):
 
         self.setLayout(layout)
 
+        
+
     def on_tab_double_clicked(self, idx):
         widget = self.tab_widget.widget(idx)
         if widget.double_click_event:
-            widget.reset_widget()
+            widget.reset_widget(True)
 
     def on_tab_clicked(self, idx):
         widget = self.tab_widget.widget(idx)
         if widget.click_event:
-            widget.reset_widget()
+            widget.reset_widget(True)
 
-
-# class MenuWidget(QtWidgets.QWidget):
-#     def __init__(self, update_widget_callback):
-#         super().__init__()
-#         self.setObjectName("menu_widget")
-#         self.update_widget_callback = update_widget_callback
-
-#         layout = QtWidgets.QVBoxLayout()
-#         add_button = ButtonComponent("Add student")
-#         show_button = ButtonComponent("Show all")
-#         # https://medium.com/seaniap/python-lambda-函式-7e86a56f1996
-#         add_button.clicked.connect(lambda: self.update_widget_callback("add"))
-#         show_button.clicked.connect(lambda: self.update_widget_callback("show"))
-
-#         layout.addWidget(add_button, stretch=1)
-#         layout.addWidget(show_button, stretch=1)
-
-#         self.setLayout(layout)
-
-
-# class FunctionWidget(QtWidgets.QStackedWidget):
-#     def __init__(self, client : SocketClient):
-#         super().__init__()
-#         self.widget_dict = {
-#             "add": self.addWidget(AddStuWidget(client)),
-#             "show": self.addWidget(ShowStuWidget(client))
-#         }
-#         self.update_widget("add")
-    
-#     def update_widget(self, name):
-#         self.setCurrentIndex(self.widget_dict[name])
-#         current_widget = self.currentWidget()
-#         current_widget.load()

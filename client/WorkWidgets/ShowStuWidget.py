@@ -8,7 +8,7 @@ class ShowStuWidget(QtWidgets.QWidget):
     def __init__(self, client : SocketClient):
         super().__init__()
         self.click_event = True
-        self.double_click_event = True
+        self.double_click_event = False
         self.setObjectName("show_stu_widget")
         self.client = client
         layout = QtWidgets.QVBoxLayout()
@@ -30,7 +30,6 @@ class ShowStuWidget(QtWidgets.QWidget):
         result_message = json.loads(result)
         if result_message['status'] == "OK":
             format_message = "====Student List====\n"
-            # self.students_list_text_edit.setText(str(result_message["parameters"]))
             for name, subjects_and_scores in result_message["parameters"].items():
                 format_message = format_message + f"Name: {name}\n"
                 for subject, score in subjects_and_scores['scores'].items():
@@ -39,10 +38,11 @@ class ShowStuWidget(QtWidgets.QWidget):
                     
             self.students_list_text_edit.setText(format_message)
 
-    def reset_widget(self):
+    def reset_widget(self, message_label_reset=False):
         self.send_command = ExecuteConfirmCommand(self.client, "show", dict())
         self.send_command.start()
         self.send_command.result_msg.connect(self.show_all_result)
+        
 
     def load(self):
         print("show widget")

@@ -79,6 +79,7 @@ class AddStuWidget(QtWidgets.QWidget):
 
         self.load()
 
+
     def load(self):
         self.reset_widget()
         print("add widget")
@@ -97,13 +98,14 @@ class AddStuWidget(QtWidgets.QWidget):
             self.query_button.setEnabled(False)
         else:
             self.query_button.setEnabled(True)
-    def reset_widget(self):
+            
+    def reset_widget(self, message_label_reset=False):
         self.setWidgetEnable()
         self.add_stru.reset_parameters()
         self.name_editor_label.setText('Name')
         self.subject_editor_label.setText("Subject")
         self.score_editor_label.setText("")
-        self.message_label.setText('')
+        if message_label_reset: self.message_label.setText("")
 
     # query button clicked event
     def query_action(self):
@@ -115,22 +117,19 @@ class AddStuWidget(QtWidgets.QWidget):
         result_message = json.loads(result)
         
         if result_message['status'] == "Fail": # status: Fail means the name can be added.
-            self.message_label.setText(f"Query success")
-            self.message_label.set_color("green")
+            self.set_message_text(f"Query success", "green")
             self.add_stru.add_name(self.name_editor_label.text())
             self.setWidgetEnable(False, True, True, False)
         else: # status: OK means the name is already in the database.
             print(f"The name {self.name_editor_label.text()} is already in the list.")
-            self.message_label.setText(f"The name {self.name_editor_label.text()} is already in the list.")
-            self.message_label.set_color("red")
+            self.set_message_text(f"The name {self.name_editor_label.text()} is already in the list.", "red")
             self.name_editor_label.setText("Name")
 
     # add button clicked event
     def add_action(self):
         if self.subject_editor_label.text() != '' and self.subject_editor_label.text() != 'Subject' and self.score_editor_label.text() != '':
             self.add_stru.add_subject_and_score(self.subject_editor_label.text(), self.score_editor_label.text())
-            self.message_label.setText(f"add {self.subject_editor_label.text()} : {self.score_editor_label.text()}")
-            self.message_label.set_color('green')
+            self.set_message_text(f"add {self.subject_editor_label.text()} : {self.score_editor_label.text()}", "green")
             self.subject_editor_label.setText('')
             self.score_editor_label.setText('')
         else:
@@ -149,10 +148,9 @@ class AddStuWidget(QtWidgets.QWidget):
     def send_action_result(self, result):
         result_message = json.loads(result)
         if result_message["status"] == "OK":
-            self.message_label.set_color("green")
-            self.message_label.setText(f"{self.add_stru.parameters['name']}'s sbjects and score save success.")
+            self.set_message_text(f"{self.add_stru.parameters['name']}'s sbjects and score save success.", "green", True)
             self.add_stru.reset_parameters()
-            self.setWidgetEnable(True, False, False, False)
+            self.reset_widget()
 
     # widget enable setting
     def setWidgetEnable(self, name_editor_enable=True, subject_and_score_editor_enable=False, add_btn_enable=False, query_btn_enable=False):
@@ -161,6 +159,14 @@ class AddStuWidget(QtWidgets.QWidget):
         self.score_editor_label.setEnabled(subject_and_score_editor_enable)
         self.add_button.setEnabled(add_btn_enable)
         self.query_button.setEnabled(query_btn_enable)
+
+    def set_message_text(self, message, color, reset=False):
+        def reset_message_text():
+           self.message_label.setText("") 
+        self.message_label.set_color(color)
+        self.message_label.setText(message)
+        if reset:
+            QtCore.QTimer.singleShot(2000, reset_message_text)
 
 class AddStru():
     def __init__(self, client:SocketClient):
@@ -184,3 +190,4 @@ class AddStru():
     
     def reset_parameters(self):
         self.parameters.clear()
+        
