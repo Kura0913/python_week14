@@ -19,32 +19,38 @@ class ModifyStuWidget(QtWidgets.QWidget):
         int_validator = QtGui.QIntValidator(0, 100)
 
         # set label
-        header_label = LabelComponent(20, "Modify Student")
-        name_label = LabelComponent(16, "Name: ")
-        subject_label = LabelComponent(16, "Subject:")
-        score_label = LabelComponent(16, "Score:")
-        self.message_label = LabelComponent(16, "")
+        header_label = LabelComponent("header_label", 20, "Modify Student", "Icons/title_modify.png")
+        name_label = LabelComponent("name_label", 16, "Name", "Icons/label.png")
+        name_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        subject_label = LabelComponent("subject_label", 16, "Subject", "Icons/label.png")
+        subject_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        score_label = LabelComponent("score_label", 16, "Score", "Icons/label.png")
+        score_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.message_label = LabelComponent("message_label", 16, "")
 
         # set combo box
-        self.name_combobox = ComboBoxComponent()
+        self.name_combobox = ComboBoxComponent("name_combobox")
         self.name_combobox.currentIndexChanged.connect(self.check_name_selected)
-        self.subject_combobox = ComboBoxComponent()
+        self.name_combobox.setEnabled(True)
+        self.subject_combobox = ComboBoxComponent("subject_combobox")
         self.subject_combobox.currentIndexChanged.connect(self.check_subject_selected)
         # set button
-        self.send_button = ButtonComponent("Send", 16)
+        self.send_button = ButtonComponent("send_button", "Send", 16)
+        self.send_button.setIcon(QtGui.QIcon(QtGui.QPixmap("./Icons/send.png")))
+        self.send_button.setIconSize(QtCore.QSize(30,30)) 
         self.send_button.setEnabled(False)
         self.send_button.clicked.connect(self.send_action)
         # editor label
-        self.subject_editor_label = LineEditComponent("Subject")
+        self.subject_editor_label = LineEditComponent("subject_editor_label", "Subject")
         self.subject_editor_label.mousePressEvent = self.clear_subject_editor_content
         self.subject_editor_label.textChanged.connect(self.subject_editor_text_changed)
         self.subject_editor_label.setEnabled(False)
 
-        self.score_editor_label = LineEditComponent("")
+        self.score_editor_label = LineEditComponent("score_editor_label", "")
         self.score_editor_label.setValidator(int_validator)
         self.score_editor_label.setEnabled(False)
 
-        self.student_score_text_edit = TextEditComponent("", 16)
+        self.student_score_text_edit = TextEditComponent("student_score_text_edit", "", 16)
         self.student_score_text_edit.setReadOnly(True)
 
         layout.addWidget(header_label, 0, 0, 1, 2)
@@ -56,10 +62,9 @@ class ModifyStuWidget(QtWidgets.QWidget):
         layout.addWidget(self.subject_editor_label, 2, 2, 1, 1)
         layout.addWidget(score_label, 3, 0, 1, 1)
         layout.addWidget(self.score_editor_label, 3, 1, 1, 1)
-        layout.addWidget(self.student_score_text_edit, 4, 0, 2, 2)
-
-        
+        layout.addWidget(self.student_score_text_edit, 4, 0, 2, 2)        
         layout.addWidget(self.send_button, 5, 3, 1, 1)
+        
         layout.setColumnStretch(0, 1)
         layout.setColumnStretch(1, 3)
         layout.setColumnStretch(2, 3)
@@ -74,7 +79,16 @@ class ModifyStuWidget(QtWidgets.QWidget):
         self.setLayout(layout)
         self.load()
 
-        # send button clicked event
+    def paintEvent(self, event):
+        painter = QtGui.QPainter(self)
+        pixmap = QtGui.QPixmap("Icons/bg1.png")
+        scaled_pixmap = pixmap.scaled(self.size(), QtCore.Qt.AspectRatioMode.IgnoreAspectRatio, QtCore.Qt.TransformationMode.SmoothTransformation)
+        x_offset = (self.width() - scaled_pixmap.width()) // 2
+        y_offset = (self.height() - scaled_pixmap.height()) // 2
+        painter.drawPixmap(x_offset, y_offset, scaled_pixmap)
+        super().paintEvent(event)
+
+    # send button clicked event
     def send_action(self):
         if self.name_combobox.currentText() != self.init_selection:
             parameters = {"name":self.name_combobox.currentText()}
@@ -164,7 +178,7 @@ class ModifyStuWidget(QtWidgets.QWidget):
 
     # set student score text edit content
     def set_score_text_edit_content(self, parameters):
-        content = f"{self.name_combobox.currentText()}\n"
+        content = f"Name:{self.name_combobox.currentText()}\n"
         for subject, score in parameters.items():
             content += f"   {subject} : {score}\n"
         self.student_score_text_edit.setText(content)

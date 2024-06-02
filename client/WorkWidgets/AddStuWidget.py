@@ -13,49 +13,61 @@ class AddStuWidget(QtWidgets.QWidget):
         self.setObjectName("add_stu_widget")
         self.client = client
         self.add_stru = AddStru(self.client)
-
         # validator
         int_validator = QtGui.QIntValidator(0, 100)
 
         layout = QtWidgets.QGridLayout()
         # label
-        header_label = LabelComponent(20, "Add Student")
-        name_label = LabelComponent(16, "Name: ")
-        subject_label = LabelComponent(16, "Subject:")
-        score_label = LabelComponent(16, "Score:")
-        self.message_label = LabelComponent(16, "")
+        header_label = LabelComponent("header_label", 20, "Add Student", "Icons/title_add.png")
+        name_label = LabelComponent("name_label", 16, "Name", "Icons/label.png")
+        name_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        subject_label = LabelComponent("subject_label", 16, "Subject", "Icons/label.png")
+        subject_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        score_label = LabelComponent("score_label", 16, "Score", "Icons/label.png")
+        score_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.message_label = LabelComponent("message_label", 16, "")
         # editor label
-        self.name_editor_label = LineEditComponent("Name")
+        self.name_editor_label = LineEditComponent("name_editor_label", "Name")
         self.name_editor_label.mousePressEvent = self.clear_name_editor_content
         self.name_editor_label.textChanged.connect(self.name_editor_text_changed)
+        self.name_editor_label.setEnabled(True)
         
-        self.subject_editor_label = LineEditComponent("Subject")
+        self.subject_editor_label = LineEditComponent("subject_editor_label", "Subject")
+        self.subject_editor_label.setObjectName("subject_editor_label")
         self.subject_editor_label.mousePressEvent = self.clear_subject_editor_content
         self.subject_editor_label.setEnabled(False)
 
-        self.score_editor_label = LineEditComponent("")
+        self.score_editor_label = LineEditComponent("score_editor_label", "")
         self.score_editor_label.setValidator(int_validator)
         self.score_editor_label.setEnabled(False)
 
         # button
-        self.query_button = ButtonComponent("Query")
+        self.query_button = ButtonComponent("query_button", "Query")
+        self.query_button.setIcon(QtGui.QIcon(QtGui.QPixmap("./Icons/search.png")))
+        self.query_button.setIconSize(QtCore.QSize(30,30)) 
         self.query_button.setEnabled(False)
-        self.query_button.clicked.connect(self.query_action)        
+        self.query_button.clicked.connect(self.query_action)
 
-        self.add_button = ButtonComponent("Add")
+        self.add_button = ButtonComponent("add_button", "Add")
+        self.add_button.setIcon(QtGui.QIcon(QtGui.QPixmap("./Icons/add.png")))
+        self.add_button.setIconSize(QtCore.QSize(30,30)) 
         self.add_button.setEnabled(False)
         self.add_button.clicked.connect(self.add_action)
 
-        self.send_button = ButtonComponent("Send")
+        self.send_button = ButtonComponent("send_button", "Send")
+        self.send_button.setIcon(QtGui.QIcon(QtGui.QPixmap("Icons/send.png")))
+        self.send_button.setIconSize(QtCore.QSize(30,30)) 
         self.send_button.setEnabled(True)
         self.send_button.clicked.connect(self.send_action)
+        
+        
 
         # set label layout
         layout.addWidget(header_label, 0, 0, 1, 2)
         layout.addWidget(name_label, 1, 0, 1, 1)
         layout.addWidget(subject_label, 2, 0, 1, 1)
         layout.addWidget(score_label, 3, 0, 1, 1)
-        layout.addWidget(self.message_label, 1, 3, 10, 10)
+        layout.addWidget(self.message_label, 1, 3, 2, 2)
         # set editor label layout
         layout.addWidget(self.name_editor_label, 1, 1, 1, 1)
         layout.addWidget(self.subject_editor_label, 2, 1, 1, 1)
@@ -79,6 +91,14 @@ class AddStuWidget(QtWidgets.QWidget):
 
         self.load()
 
+    def paintEvent(self, event):
+        painter = QtGui.QPainter(self)
+        pixmap = QtGui.QPixmap("Icons/bg1.png")
+        scaled_pixmap = pixmap.scaled(self.size(), QtCore.Qt.AspectRatioMode.IgnoreAspectRatio, QtCore.Qt.TransformationMode.SmoothTransformation)
+        x_offset = (self.width() - scaled_pixmap.width()) // 2
+        y_offset = (self.height() - scaled_pixmap.height()) // 2
+        painter.drawPixmap(x_offset, y_offset, scaled_pixmap)
+        super().paintEvent(event)
 
     def load(self):
         self.reset_widget()
